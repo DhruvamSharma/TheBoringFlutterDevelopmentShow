@@ -38,6 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: RefreshIndicator(
         onRefresh: () async {
           await Future.delayed(Duration(milliseconds: 1000));
+          if (_articles.length > 0)
           setState(() {
             _articles.removeAt(0);
           });
@@ -52,6 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _buildItem(Article e) {
     return Padding(
+      key: Key(e.text),
       padding: const EdgeInsets.all(16.0),
       child: ExpansionTile(
         title: Text(
