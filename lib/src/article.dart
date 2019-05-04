@@ -1,90 +1,93 @@
 class Article {
   final String text;
-  final String domain;
+  final String url;
   final String by;
   final int score;
-  final String age;
-  final int commentCount;
+  final int time;
 
   const Article(
       {this.text,
-      this.domain,
+      this.url,
       this.by,
       this.score,
-      this.age,
-      this.commentCount});
+      this.time});
+
+  factory Article.fromJson(Map<String, dynamic> json) {
+    if (json == null) {
+      return null;
+    }
+    return Article(
+      text: json['title'] ?? '[null]',
+      url: json['url'] ?? '',
+      time: json['time'],
+      by: json['by'] ?? '',
+      score: json['score'] ?? 0
+    );
+  }
 }
 
 final articles = [
   Article(
     text: 'Circular Shock leads the way into glory',
-    age: '12/12/14',
+    time: 7263763,
     by: 'Ramona',
-    commentCount: 32,
-    domain: 'www.wiley.com',
+    url: 'www.wiley.com',
     score: 12,
   ),
 
   Article(
     text: 'Circular Shock',
-    age: '12/12/14',
+    time: 78368723,
     by: 'Ramona',
-    commentCount: 32,
-    domain: 'wiley.com',
+    url: 'wiley.com',
     score: 12,
   ),
 
   Article(
     text: 'Circular Shock',
-    age: '12/12/14',
+    time: 3276728,
     by: 'Ramona',
-    commentCount: 32,
-    domain: 'wiley.com',
+    url: 'wiley.com',
     score: 12,
   ),
 
   Article(
     text: 'Circular Shock',
-    age: '12/12/14',
+    time: 327647,
     by: 'Ramona',
-    commentCount: 32,
-    domain: 'wiley.com',
+    url: 'wiley.com',
     score: 12,
   ),
 
   Article(
     text: 'Circular Shock',
-    age: '12/12/14',
+    time: 234234,
     by: 'Ramona',
-    commentCount: 32,
-    domain: 'wiley.com',
+    url: 'wiley.com',
     score: 12,
   ),
 
   Article(
     text: 'Circular Shock',
-    age: '12/12/14',
+    time: 234324,
     by: 'Ramona',
-    commentCount: 32,
-    domain: 'wiley.com',
+    url: 'wiley.com',
     score: 12,
   ),
 
   Article(
     text: 'Circular Shock',
-    age: '12/12/14',
+    time: 234234,
     by: 'Ramona',
-    commentCount: 32,
-    domain: 'wiley.com',
+    url: 'wiley.com',
     score: 12,
   ),
 
   Article(
     text: 'Circular Shock',
-    age: '12/12/14',
+    time: 324234234,
     by: 'Ramona',
-    commentCount: 32,
-    domain: 'wiley.com',
+    url: 'wiley.com',
     score: 12,
   ),
 ];
