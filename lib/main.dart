@@ -64,11 +64,11 @@ class _MyHomePageState extends State<MyHomePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              Text('${e.commentCount} Comments'),
+              Text('${e.by}'),
               IconButton(
                 icon: Icon(Icons.launch),
                 onPressed: () async {
-                  final fakeUrl = 'https://${e.domain}';
+                  final fakeUrl = 'https://${e.url}';
                   if (await canLaunch(fakeUrl)) {
                     launch(fakeUrl);
                   }
