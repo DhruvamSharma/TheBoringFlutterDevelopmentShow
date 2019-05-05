@@ -1,11 +1,19 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
-import 'package:the_boring_flutter_dev_show/json_parsing.dart';
-import 'package:the_boring_flutter_dev_show/src/data_provider.dart';
+import 'package:the_boring_flutter_dev_show/src/article.dart';
+import 'package:the_boring_flutter_dev_show/src/news_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  final hnBloc = HackerNewsBloc();
+  runApp(MyApp(hnBloc: hnBloc));
+}
 
 class MyApp extends StatelessWidget {
+  final HackerNewsBloc hnBloc;
+  MyApp({this.hnBloc});
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -14,30 +22,21 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Flutter Hacker News', hnBloc: hnBloc),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key key, this.title, this.hnBloc}) : super(key: key);
   final String title;
+  final HackerNewsBloc hnBloc;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<int> _ids = [];
-  DataProvider _provider = DataProvider();
-
-  @override
-  void initState() {
-    _provider.getNewsIds().then((List<int> value) {
-      _ids = value;
-    });
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,19 +44,32 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: ListView(
-        children: _ids.map((i) =>
-          FutureBuilder<Article> (
-            future: _provider.getNewsArticle(i),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              return _buildItem(snapshot.data);
+      body: StreamBuilder<UnmodifiableListView<Article>> (
+          initialData: UnmodifiableListView<Article>([]),
+          stream: widget.hnBloc.article,
+          builder: (context, snapshot) => ListView(
+            children: snapshot.data.map(_buildItem).toList(),
+          ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 1,
+          items: [
+            BottomNavigationBarItem(
+                icon: Icon(Icons.domain),
+              title: Text('Top Stories'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.new_releases),
+              title: Text('New Stories'),
+            ),
+          ],
+        onTap: (index) {
+            if (index == 0) {
+              widget.hnBloc.storyTypeSink.add(StoryType.topStories);
             } else {
-              return Center(child: CircularProgressIndicator());
+              widget.hnBloc.storyTypeSink.add(StoryType.newStories);
             }
-          },
-        )
-        ).toList(),
+        },
       ),
       // This trailing comma makes auto-formatting nicer for build methods.
     );
@@ -65,23 +77,23 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _buildItem(Article e) {
     return Padding(
-      key: Key(e.title),
+      key: Key(e.title?? 'null'),
       padding: const EdgeInsets.all(16.0),
       child: ExpansionTile(
         title: Text(
-          e.title,
-          style: TextStyle(fontSize: 24),
+          e.title?? 'null',
+          style: TextStyle(fontSize: 16),
         ),
         children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              Text('${e.by}'),
+              Text('${e.by?? ''}'),
               IconButton(
                 icon: Icon(Icons.launch),
                 onPressed: () async {
-                  if (await canLaunch(e.url)) {
-                    launch(e.url);
+                  if (await canLaunch(e.url?? '')) {
+                    launch(e.url?? '');
                   }
                 },
               )
