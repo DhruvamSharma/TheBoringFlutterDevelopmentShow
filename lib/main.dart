@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:the_boring_flutter_dev_show/src/article.dart';
+import 'package:the_boring_flutter_dev_show/json_parsing.dart';
+import 'package:the_boring_flutter_dev_show/src/data_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 void main() => runApp(MyApp());
@@ -27,7 +28,16 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<Article> _articles = articles;
+  List<int> _ids = [];
+  DataProvider _provider = DataProvider();
+
+  @override
+  void initState() {
+    _provider.getNewsIds().then((List<int> value) {
+      _ids = value;
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,17 +45,19 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await Future.delayed(Duration(milliseconds: 1000));
-          if (_articles.length > 0)
-          setState(() {
-            _articles.removeAt(0);
-          });
-        },
-        child: ListView(
-          children: _articles.map(_buildItem).toList(),
-        ),
+      body: ListView(
+        children: _ids.map((i) =>
+          FutureBuilder<Article> (
+            future: _provider.getNewsArticle(i),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return _buildItem(snapshot.data);
+            } else {
+              return Center(child: CircularProgressIndicator());
+            }
+          },
+        )
+        ).toList(),
       ),
       // This trailing comma makes auto-formatting nicer for build methods.
     );
@@ -53,11 +65,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _buildItem(Article e) {
     return Padding(
-      key: Key(e.text),
+      key: Key(e.title),
       padding: const EdgeInsets.all(16.0),
       child: ExpansionTile(
         title: Text(
-          e.text,
+          e.title,
           style: TextStyle(fontSize: 24),
         ),
         children: <Widget>[
@@ -68,9 +80,8 @@ class _MyHomePageState extends State<MyHomePage> {
               IconButton(
                 icon: Icon(Icons.launch),
                 onPressed: () async {
-                  final fakeUrl = 'https://${e.url}';
-                  if (await canLaunch(fakeUrl)) {
-                    launch(fakeUrl);
+                  if (await canLaunch(e.url)) {
+                    launch(e.url);
                   }
                 },
               )
