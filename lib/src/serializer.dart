@@ -5,7 +5,7 @@
 library serializers;
 
 import 'package:built_value/serializer.dart';
-import 'package:the_boring_flutter_dev_show/json_parsing.dart';
+import 'package:the_boring_flutter_dev_show/src/article.dart';
 import 'package:built_value/standard_json_plugin.dart';
 import 'package:built_collection/built_collection.dart';
 
