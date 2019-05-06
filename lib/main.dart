@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.deepOrange,
       ),
       home: MyHomePage(title: 'Flutter Hacker News', hnBloc: hnBloc),
     );
@@ -38,21 +38,32 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  int _currentIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: StreamBuilder<UnmodifiableListView<Article>> (
-          initialData: UnmodifiableListView<Article>([]),
-          stream: widget.hnBloc.article,
-          builder: (context, snapshot) => ListView(
-            children: snapshot.data.map(_buildItem).toList(),
-          ),
+      body: StreamBuilder(
+        stream: widget.hnBloc.isLoading,
+        builder: (context, snapshot) {
+          if (snapshot.data) {
+            return Center(child: CircularProgressIndicator());
+          } else {
+            return StreamBuilder<UnmodifiableListView<Article>> (
+              initialData: UnmodifiableListView<Article>([]),
+              stream: widget.hnBloc.article,
+              builder: (context, snapshot) => ListView(
+                children: snapshot.data.map(_buildItem).toList(),
+              ),
+            );
+          }
+        },
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1,
+        currentIndex: _currentIndex,
           items: [
             BottomNavigationBarItem(
                 icon: Icon(Icons.domain),
@@ -64,6 +75,9 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
             if (index == 0) {
               widget.hnBloc.storyTypeSink.add(StoryType.topStories);
             } else {
