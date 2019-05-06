@@ -22,18 +22,24 @@ class HackerNewsBloc extends BaseBloc {
   
   final storyTypeController = StreamController<StoryType>();
 
+  Stream<bool> get isLoading => _isLoadingSubject.stream;
+
+  final _isLoadingSubject = BehaviorSubject<bool>();
+
   HackerNewsBloc() {
-    getAndUpdateArticles(StoryType.topStories);
+    _getAndUpdateArticles(StoryType.topStories);
 
     storyTypeController.stream.listen((data) {
-      getAndUpdateArticles(data);
+      _getAndUpdateArticles(data);
     });
   }
 
-  getAndUpdateArticles(StoryType storyType) {
+  _getAndUpdateArticles(StoryType storyType) {
+    _isLoadingSubject.add(true);
     getListIds(storyType).then((list) {
-      getArticles(list).then((_){
+      getArticles(list.sublist(0, 10)).then((_){
         _articleSubject.add(UnmodifiableListView(_articles));
+        _isLoadingSubject.add(false);
       });
     });
   }
@@ -56,6 +62,7 @@ class HackerNewsBloc extends BaseBloc {
   @override
   void dispose() {
     _articleSubject.close();
+    _isLoadingSubject.close();
     storyTypeController.close();
   }
 }
